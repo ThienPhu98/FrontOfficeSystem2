@@ -3,6 +3,7 @@ package System.service;
 import System.model.Guest;
 import System.model.Room;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public interface IGuestService {
@@ -16,11 +17,11 @@ public interface IGuestService {
     Guest findGuestInHouseById(String guestId);
 
 //do booking
-    void booking(Guest guest);
+    boolean booking(Guest guest) throws SQLException;
 
-    void updateReservation(String bookingCode, Guest guest);
+    boolean updateReservation(String bookingCode, Guest guest) throws SQLException;
 
-    void removeReservation(String bookingCode);
+    boolean removeReservation(String bookingCode) throws SQLException;
 
 
 //do check-in

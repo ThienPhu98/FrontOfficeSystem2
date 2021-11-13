@@ -1,7 +1,6 @@
 package System.controller;
 
 import System.Tools.CompareDate;
-import System.Tools.DateTransfer;
 import System.Tools.DateValidatorUsingDateFormat;
 import System.model.Guest;
 import System.model.Staff;
@@ -15,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +26,6 @@ public class SystemServlet extends HttpServlet {
     private IRoomService roomService = new RoomService();
     private IStaffService staffService = new StaffService();
     CompareDate compareDate = new CompareDate();
-    DateTransfer dateTransfer = new DateTransfer();
     DateValidatorUsingDateFormat dateFormat = new DateValidatorUsingDateFormat();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
@@ -34,13 +33,20 @@ public class SystemServlet extends HttpServlet {
         if (action == null) {
             action = "";
         }
-
         switch (action) {
             case "booking":
-                doBooking(request, response);
+                try {
+                    doBooking(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 break;
-            case "updateReservation":
-                doUpdateReservation(request, response);
+            case "update":
+                try {
+                    doUpdateReservation(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 break;
             case "checkInWithOutReservation":
                 break;
@@ -68,7 +74,10 @@ public class SystemServlet extends HttpServlet {
             case "bookingList":
                 showBookingList(request, response);
                 break;
-            case "updateReservation":
+            case "update":
+                showUpdateForm(request, response);
+                break;
+            case "remove":
                 showUpdateForm(request, response);
                 break;
             case "removeReservation":
@@ -122,8 +131,27 @@ public class SystemServlet extends HttpServlet {
     }
 
     private void showMainMenu(HttpServletRequest request, HttpServletResponse response) {
+        String today = String.valueOf(java.time.LocalDate.now());
+        ArrayList<Guest> bookingList = guestService.findBookingList();
+        ArrayList<Guest> inHouseList = guestService.findInHouseGuestList();
+
+        int countArrivalGuest = 0;
+        for (Guest guest: bookingList) {
+            if (guest.getDayArrival().equals(today)) {
+                countArrivalGuest += 1;
+            }
+        }
+
+        int countDepartureGuest = 0;
+        for (Guest guest: inHouseList){
+            if (guest.getDayLeave().equals(today)) {
+                countDepartureGuest += 1;
+            }
+        }
 
         RequestDispatcher dispatcher = request.getRequestDispatcher("staff/mainMenu.jsp");
+        request.setAttribute("countArrivalGuest", countArrivalGuest);
+        request.setAttribute("countDepartureGuest", countDepartureGuest);
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
@@ -140,13 +168,10 @@ public class SystemServlet extends HttpServlet {
         }
     }
 
-    private void doBooking(HttpServletRequest request, HttpServletResponse response) {
-
-        RequestDispatcher dispatcher = null;
-
+    private void doBooking(HttpServletRequest request, HttpServletResponse response) throws SQLException {
         String checkName;
         String fullName = "";
-        String OutPutFullName = request.getParameter("fullName");
+        String OutPutFullName = request.getParameter("guestName");
         if (OutPutFullName.length() > 0) {
             Pattern pattern = Pattern.compile("^([A-Za-z]*[ ]?)+$");
             Matcher matcher = pattern.matcher(OutPutFullName);
@@ -174,8 +199,7 @@ public class SystemServlet extends HttpServlet {
             checkPhoneNumber = "false";
         }
 
-        String outPutToday = String.valueOf(java.time.LocalDate.now());
-        String today = dateTransfer.transfer(outPutToday);
+        String today = String.valueOf(java.time.LocalDate.now());
         String checkArrivalDate;
         String arrivalDate = request.getParameter("arrivalDate");
         if (dateFormat.isDateValid(arrivalDate)) {
@@ -191,7 +215,7 @@ public class SystemServlet extends HttpServlet {
         String checkDepartureDate;
         String departureDate = request.getParameter("departureDate");
         if (dateFormat.isDateValid(departureDate)) {
-            if (compareDate.compare(departureDate,arrivalDate) >= 0) {
+            if (compareDate.compare(departureDate,arrivalDate) > 0) {
                 checkDepartureDate = "success";
             } else {
                 checkDepartureDate = "false";
@@ -216,6 +240,7 @@ public class SystemServlet extends HttpServlet {
             checkGuaranteeFee = "false";
         }
 
+        RequestDispatcher dispatcher = request.getRequestDispatcher("guest/booking.jsp");
         if (checkName.equals("success") && checkPhoneNumber.equals("success") && checkArrivalDate.equals("success")
                 && checkDepartureDate.equals("success") && checkGuaranteeFee.equals("success")) {
             String methodPayment = request.getParameter("methodPayment");
@@ -227,13 +252,14 @@ public class SystemServlet extends HttpServlet {
                 if(isBookingCodeValid(bookingCode)) {
                     checkBookingCode = true;
                     Guest guest = new Guest(bookingCode, fullName, phoneNumber, arrivalDate, departureDate, guaranteeFee, methodPayment);
-                    guestService.booking(guest);
-                    dispatcher = request.getRequestDispatcher("guest/booking.jsp");
-                    request.setAttribute("message", "success");
+                    if (guestService.booking(guest)) {
+                        request.setAttribute("message", "success");
+                    } else {
+                        request.setAttribute("message", "false");
+                    }
                 }
             }
         } else {
-            dispatcher = request.getRequestDispatcher("guest/booking.jsp");
             request.setAttribute("message", "false");
             request.setAttribute("checkName", checkName);
             request.setAttribute("checkPhoneNumber", checkPhoneNumber);
@@ -247,6 +273,7 @@ public class SystemServlet extends HttpServlet {
             request.setAttribute("departureDate", departureDate);
             request.setAttribute("outPutGuaranteeFee", outPutGuaranteeFee);
         }
+
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
@@ -267,44 +294,134 @@ public class SystemServlet extends HttpServlet {
     }
 
     private void showUpdateForm(HttpServletRequest request, HttpServletResponse response) {
-        String bookingCode = request.getParameter("bookingCode");
+        String bookingCode = request.getParameter("id");
         Guest guest = guestService.findGuestByBookingCode(bookingCode);
         RequestDispatcher dispatcher;
         if(guest == null){
             dispatcher = request.getRequestDispatcher("error-404.jsp");
         } else {
             request.setAttribute("guest", guest);
-            dispatcher = request.getRequestDispatcher("guest/updateReservation.jsp");
+            dispatcher = request.getRequestDispatcher("guest/update.jsp");
         }
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
             e.printStackTrace();
         }
+
     }
 
-    private void doUpdateReservation (HttpServletRequest request, HttpServletResponse response) {
-        String bookingCode = request.getParameter("bookingCode");
-        String fullName = request.getParameter("fullName");
+    private void doUpdateReservation (HttpServletRequest request, HttpServletResponse response) throws SQLException {
+        String checkName;
+        String fullName = "";
+        String OutPutFullName = request.getParameter("guestName");
+        if (OutPutFullName.length() > 0) {
+            Pattern pattern = Pattern.compile("^([A-Za-z]*[ ]?)+$");
+            Matcher matcher = pattern.matcher(OutPutFullName);
+            if (matcher.matches()) {
+                checkName = "success";
+                fullName = toTitleCase(OutPutFullName);
+            } else {
+                checkName = "false";
+            }
+        } else {
+            checkName = "false";
+        }
+
+        String checkPhoneNumber;
         String phoneNumber = request.getParameter("phoneNumber");
-        String dayArrival = request.getParameter("arrivalDate");
+        if(phoneNumber.length() == 10 || phoneNumber.length() == 11) {
+            Pattern pattern = Pattern.compile("^[0]\\d{9,10}");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (matcher.matches()) {
+                checkPhoneNumber = "success";
+            } else {
+                checkPhoneNumber = "false";
+            }
+        } else {
+            checkPhoneNumber = "false";
+        }
+
+        String today = String.valueOf(java.time.LocalDate.now());
+        String checkArrivalDate;
+        String arrivalDate = request.getParameter("arrivalDate");
+        if (dateFormat.isDateValid(arrivalDate)) {
+            if (compareDate.compare(arrivalDate,today) >= 0) {
+                checkArrivalDate = "success";
+            } else {
+                checkArrivalDate = "false";
+            }
+        } else {
+            checkArrivalDate = "false";
+        }
+
+        String checkDepartureDate;
         String departureDate = request.getParameter("departureDate");
+        if (dateFormat.isDateValid(departureDate)) {
+            if (compareDate.compare(departureDate,arrivalDate) > 0) {
+                checkDepartureDate = "success";
+            } else {
+                checkDepartureDate = "false";
+            }
+        } else {
+            checkDepartureDate = "false";
+        }
+
+        String checkGuaranteeFee;
         String outPutGuaranteeFee = request.getParameter("guaranteeFee");
-        BigDecimal guaranteeFee = new BigDecimal(outPutGuaranteeFee);
+        BigDecimal guaranteeFee = null;
+        if (outPutGuaranteeFee.length() <= 10) {
+            Pattern pattern = Pattern.compile("\\d*");
+            Matcher matcher = pattern.matcher(outPutGuaranteeFee);
+            if (matcher.matches()) {
+                guaranteeFee = new BigDecimal(outPutGuaranteeFee);
+                checkGuaranteeFee = "success";
+            } else {
+                checkGuaranteeFee = "false";
+            }
+        } else {
+            checkGuaranteeFee = "false";
+        }
+
         String methodPayment = request.getParameter("methodPayment");
+        String bookingCode = request.getParameter("bookingCode");
 
-        Guest guest = new Guest(bookingCode, fullName, phoneNumber, dayArrival, departureDate, guaranteeFee, methodPayment);
-        guestService.updateReservation(bookingCode, guest);
+        RequestDispatcher dispatcher = null;
+        if (checkName.equals("success") && checkPhoneNumber.equals("success") && checkArrivalDate.equals("success")
+                && checkDepartureDate.equals("success") && checkGuaranteeFee.equals("success")) {
+            Guest guest = new Guest(bookingCode, fullName, phoneNumber, arrivalDate, departureDate, guaranteeFee, methodPayment);
+            if (guestService.updateReservation(bookingCode,guest)) {
+                dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
+                ArrayList<Guest> bookingList = guestService.findBookingList();
+                request.setAttribute("bookingList", bookingList);
+            } else {
+                dispatcher = request.getRequestDispatcher("guest/update.jsp");
+                request.setAttribute("message", "false");
+            }
+        } else {
+            dispatcher = request.getRequestDispatcher("guest/update.jsp");
+            request.setAttribute("message", "false");
+            request.setAttribute("checkName", checkName);
+            request.setAttribute("checkPhoneNumber", checkPhoneNumber);
+            request.setAttribute("checkArrivalDate", checkArrivalDate);
+            request.setAttribute("checkDepartureDate", checkDepartureDate);
+            request.setAttribute("checkGuaranteeFee", checkGuaranteeFee);
 
-        RequestDispatcher dispatcher = request.getRequestDispatcher("guest/updateReservation.jsp");
-        request.setAttribute("message", "Success");
+            request.setAttribute("fullName", fullName);
+            request.setAttribute("phoneNumber", phoneNumber);
+            request.setAttribute("arrivalDate", arrivalDate);
+            request.setAttribute("departureDate", departureDate);
+            request.setAttribute("outPutGuaranteeFee", outPutGuaranteeFee);
+            request.setAttribute("methodPayment", methodPayment);
+            request.setAttribute("bookingCode", bookingCode);
+        }
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {
             e.printStackTrace();
         }
-
     }
+
 
 
 
@@ -330,11 +447,11 @@ public class SystemServlet extends HttpServlet {
 
     public String toTitleCase(String inputString) {
         String[] arr = inputString.split(" ");
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
 
-        for (int i = 0; i < arr.length; i++) {
-            stringBuffer.append(Character.toUpperCase(arr[i].charAt(0)))
-                    .append(arr[i].substring(1)).append(" ");
+        for (String s : arr) {
+            stringBuffer.append(Character.toUpperCase(s.charAt(0)))
+                    .append(s.substring(1)).append(" ");
         }
         return stringBuffer.toString().trim();
     }

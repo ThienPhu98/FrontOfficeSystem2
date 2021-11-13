@@ -32,7 +32,7 @@
 
 <main class="form-signin">
         <form method="post">
-            <img class="mb-4" src="${pageContext.request.contextPath}/asset/picture/Logo.png" alt="" width="200" height="200">
+            <img class="mb-4" src="${pageContext.request.contextPath}/asset/picture/Logo.png" alt="" width="240" height="240">
             <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
             <div class="form-floating">

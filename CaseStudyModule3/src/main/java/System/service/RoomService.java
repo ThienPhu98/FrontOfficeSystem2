@@ -1,4 +1,5 @@
 package System.service;
+import System.Tools.GetConnection;
 
 import System.model.Room;
 
@@ -8,16 +9,12 @@ import java.util.ArrayList;
 
 public class RoomService implements IRoomService{
 
-    private String jdbcURL = "jdbc:mysql://localhost:3306/FrontOfficeSystem?useSSL=false";
-    private String jdbcUsername = "root";
-    private String jdbcPassword = "123456";
-
     @Override
     public ArrayList<Room> findRoomList() {
         ArrayList<Room> roomList = new ArrayList<>();
         String SELECT_ROOM_LIST = "SELECT roomNumber, roomType, roomStatus, roomPrice, isAvailable, guestId FROM Rooms;";
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ROOM_LIST);
             System.out.println(preparedStatement);
             ResultSet rs = preparedStatement.executeQuery();
@@ -35,7 +32,7 @@ public class RoomService implements IRoomService{
                 roomList.add(new Room(roomNumber, roomType, roomStatus, roomPrice, isAvailable, guestId));
             }
         } catch (SQLException e) {
-            printSQLException(e);
+            GetConnection.printSQLException(e);
         }
         return roomList;
     }
@@ -44,13 +41,13 @@ public class RoomService implements IRoomService{
     public void changeRoomStatus(String roomNumber, String status) {
         String CHANGE_ROOM_STATUS = "UPDATE Rooms SET roomStatus = ? WHERE roomNumber = ?;";
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(CHANGE_ROOM_STATUS);
             preparedStatement.setString(1, status);
             preparedStatement.setString(2, roomNumber);
             preparedStatement.execute();
         } catch (SQLException e) {
-            printSQLException(e);
+            GetConnection.printSQLException(e);
         }
     }
 
@@ -58,7 +55,7 @@ public class RoomService implements IRoomService{
     public void changeRoomAvailability(String roomNumber, boolean isAvailable) {
         String CHANGE_ROOM_AVAILABILITY = "UPDATE Rooms SET isAvailable = ? WHERE roomNumber = ?;";
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(CHANGE_ROOM_AVAILABILITY);
             if (isAvailable) {
                 preparedStatement.setString(1, "true");
@@ -68,7 +65,7 @@ public class RoomService implements IRoomService{
             preparedStatement.setString(2, roomNumber);
             preparedStatement.execute();
         } catch (SQLException e) {
-            printSQLException(e);
+            GetConnection.printSQLException(e);
         }
     }
 
@@ -76,13 +73,13 @@ public class RoomService implements IRoomService{
     public void changeRoomPrice(String roomNumber, BigDecimal price) {
         String CHANGE_ROOM_PRICE = "UPDATE Rooms SET roomPrice = ? WHERE roomNumber = ?;";
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(CHANGE_ROOM_PRICE);
             preparedStatement.setBigDecimal(1, price);
             preparedStatement.setString(2, roomNumber);
             preparedStatement.execute();
         } catch (SQLException e) {
-            printSQLException(e);
+            GetConnection.printSQLException(e);
         }
     }
 
@@ -90,41 +87,13 @@ public class RoomService implements IRoomService{
     public void changeGuestId(String roomNumber, String guestId) {
         String CHANGE_ROOM_GUEST_ID = "UPDATE Rooms SET guestId = ? WHERE roomNumber = ?;";
         try {
-            Connection connection = getConnection();
+            Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(CHANGE_ROOM_GUEST_ID);
             preparedStatement.setString(1, guestId);
             preparedStatement.setString(2, roomNumber);
             preparedStatement.execute();
         } catch (SQLException e) {
-            printSQLException(e);
-        }
-    }
-
-    protected Connection getConnection() {
-        Connection connection = null;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
-        } catch (SQLException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return connection;
-    }
-
-    private void printSQLException(SQLException ex) {
-        for (Throwable e : ex) {
-            if (e instanceof SQLException) {
-                e.printStackTrace(System.err);
-                System.err.println("SQLState: " + ((SQLException) e).getSQLState());
-                System.err.println("Error Code: " + ((SQLException) e).getErrorCode());
-                System.err.println("Message: " + e.getMessage());
-                Throwable t = ex.getCause();
-                while (t != null) {
-                    System.out.println("Cause: " + t);
-                    t = t.getCause();
-                }
-            }
+            GetConnection.printSQLException(e);
         }
     }
 }

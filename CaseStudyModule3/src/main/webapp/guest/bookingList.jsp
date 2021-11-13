@@ -1,59 +1,4 @@
-<%--<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>--%>
-<%--<%@ page contentType="text/html;charset=UTF-8" language="java" %>--%>
-<%--<html>--%>
-<%--<head>--%>
-<%--    <title>Booking List</title>--%>
-<%--</head>--%>
-<%--<body>--%>
-<%--<div>--%>
-<%--    <h1>Booking List</h1>--%>
-<%--    <div>--%>
-<%--        <table class="table table-hover table-centered mb-0">--%>
-<%--            <thead>--%>
-<%--            <tr class="table-primary">--%>
-<%--                <th scope="col">#</th>--%>
-<%--                <th scope="col">guestName</th>--%>
-<%--                <th scope="col">phoneNumber</th>--%>
-<%--                <th scope="col">dayArrival</th>--%>
-<%--                <th scope="col">dayLeave</th>--%>
-<%--                <th scope="col">guaranteeFee</th>--%>
-<%--                <th scope="col">methodPayment</th>--%>
-<%--                <th colspan="3">Action</th>--%>
-<%--            </tr>--%>
-<%--            </thead>--%>
-<%--            <tbody>--%>
-<%--            <c:forEach items='${requestScope["bookingList"]}' var="guest">--%>
-<%--                <tr>--%>
-<%--                    <td>${guest.getBookingCode()}</td>--%>
-<%--                    <td>${guest.getGuestName()}</td>--%>
-<%--                    <td>${guest.getPhoneNumber()}</td>--%>
-<%--                    <td>${guest.getDayArrival()}</td>--%>
-<%--                    <td>${guest.getDayLeave()}</td>--%>
-<%--                    <td>${guest.getGuaranteeFee()}</td>--%>
-<%--                    <td>${guest.getMethodPayment()}</td>--%>
-<%--                    <td>--%>
-<%--                        <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=checkIn&bookingCode=${guest.getBookingCode()}"'>--%>
-<%--                        </button>--%>
-<%--                    </td>--%>
-<%--                    <td>--%>
-<%--                        <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=updateBookingList&bookingCode=${guest.getBookingCode()}"'>--%>
-<%--                        </button>--%>
-<%--                    </td>--%>
-<%--                    <td>--%>
-<%--                        <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=removeBookingList&bookingCode=${guest.getBookingCode()}"'>--%>
-<%--                        </button>--%>
-<%--                    </td>--%>
-<%--                </tr>--%>
-<%--            </c:forEach>--%>
-<%--            </tbody>--%>
-<%--        </table>--%>
-<%--    </div>--%>
-<%--</div>--%>
-<%--</body>--%>
-<%--</html>--%>
-
-
-
+<%@ page import="java.text.DecimalFormat" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
@@ -61,6 +6,11 @@
 <head>
     <title>Booking List</title>
     <%@include file ="/layout/headAndLink.jsp" %>
+    <style>
+        .active_point:hover {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -78,10 +28,10 @@
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item" onclick='window.location.href="/system?action=mainMenu"'>
                                     <i class="fas fa-user-alt"></i>
-                                    <span>MainMenu</span>
+                                    <span class= "active_point">MainMenu</span>
                                 </li>
                                 <li class="breadcrumb-item active">
-                                    <i class="fas fa-user-plus"></i>
+                                    <i class="fas fa-list-alt"></i>
                                     <span>Booking List</span>
                                 </li>
                             </ol>
@@ -105,7 +55,7 @@
                                     <th scope="col">dayLeave</th>
                                     <th scope="col">guaranteeFee</th>
                                     <th scope="col">methodPayment</th>
-                                    <th colspan="3">Action</th>
+                                    <th colspan="3" style="text-align: center">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -119,15 +69,18 @@
                                         <td>${guest.getGuaranteeFee()}</td>
                                         <td>${guest.getMethodPayment()}</td>
                                         <td>
-                                            <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=checkIn&bookingCode=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-success" onclick='window.location.href="/system?action=checkIn&bookingCode=${guest.getBookingCode()}"'>
+                                                <i class="fas fa-user-check"></i>
                                             </button>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=updateBookingList&bookingCode=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-warning" onclick='window.location.href="/system?action=update&id=${guest.getBookingCode()}"'>
+                                                <i class="fas fa-user-edit"></i>
                                             </button>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-outline-success" onclick='window.location.href="/system?action=removeBookingList&bookingCode=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-danger" onclick='window.location.href="/system?action=remove&bookingCode=${guest.getBookingCode()}"'>
+                                                <i class="fas fa-user-times"></i>
                                             </button>
                                         </td>
                                     </tr>

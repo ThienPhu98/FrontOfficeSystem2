@@ -6,6 +6,11 @@
 <head>
     <title>MainMenu</title>
     <%@include file ="/layout/headAndLink.jsp" %>
+    <style>
+        .active_point:hover {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -23,7 +28,7 @@
                             <ol class="breadcrumb m-0">
                                 <li class="breadcrumb-item" onclick='window.location.href="/system?action=mainMenu"'>
                                     <i class="fas fa-user-alt"></i>
-                                    <span>MainMenu</span>
+                                    <span class= "active_point">MainMenu</span>
                                 </li>
                             </ol>
                         </div>
@@ -35,23 +40,27 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div>
-                            <button id="add-new-btn" class="btn btn-lg btn-primary" onclick='window.location.href="/system?action=showRoomList"'>
-                                <i class="fas fa-bed"></i>
-                                <span>Room Status</span>
-                            </button>
-                            <button id="transfer-info-btn" class="btn btn-lg btn-primary" onclick='window.location.href="/system?action=bookingList"'>
-                                <i class="fas fa-address-book"></i>
-                                <span>Booking-List</span>
-                            </button>
+                        <div class="card-body">
+                            <div>
+                                <button id="add-new-btn" class="btn btn-lg btn-primary" onclick='window.location.href="/system?action=showRoomList"'>
+                                    <i class="fas fa-bed"></i>
+                                    <span>Room Status</span>
+                                </button>
+                                <button id="transfer-info-btn" class="btn btn-lg btn-primary" onclick='window.location.href="/system?action=bookingList"'>
+                                    <i class="fas fa-address-book"></i>
+                                    <span>Booking-List</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div>
                                 <div class="alert alert-primary" role="alert">
                                     Total Guest Arrival today:
+                                    ${requestScope["countArrivalGuest"]}
                                 </div>
                                 <div class="alert alert-warning" role="alert">
                                     Total Guest Departure today:
+                                    ${requestScope["countDepartureGuest"]}
                                 </div>
                             </div>
                         </div>

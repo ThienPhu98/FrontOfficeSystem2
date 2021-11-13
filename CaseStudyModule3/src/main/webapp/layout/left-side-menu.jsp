@@ -3,7 +3,7 @@
 
         <a class="logo text-center mb-4">
             <span class="logo-lg">
-                <img src="${pageContext.request.contextPath}/asset/picture/Logo.png" alt="" height="150" width="150">
+                <img src="${pageContext.request.contextPath}/asset/picture/Logo.png" alt="" height="180" width="180">
             </span>
         </a>
 

@@ -4,13 +4,13 @@ public class CompareDate {
     public int compare(String date1, String date2){
         String[] FirstDate = date1.split("-");
         String[] SecondDate = date2.split("-");
-        int dayDate1 = Integer.parseInt(FirstDate[0]);
+        int dayDate1 = Integer.parseInt(FirstDate[2]);
         int monthDate1 = Integer.parseInt(FirstDate[1]);
-        int yearDate1 = Integer.parseInt(FirstDate[2]);
+        int yearDate1 = Integer.parseInt(FirstDate[0]);
 
-        int dayDate2 = Integer.parseInt(SecondDate[0]);
+        int dayDate2 = Integer.parseInt(SecondDate[2]);
         int monthDate2 = Integer.parseInt(SecondDate[1]);
-        int yearDate2 = Integer.parseInt(SecondDate[2]);
+        int yearDate2 = Integer.parseInt(SecondDate[0]);
 
         if (compareInt(yearDate1, yearDate2) != 0) {
             return compareInt(yearDate1, yearDate2);
