@@ -22,7 +22,7 @@
 
                     <a href="javascript:void(0);" class="dropdown-item notify-item">
                         <div class="notify-icon">
-                            <img src="${pageContext.request.contextPath}/asset/simulor-admin-dashboard/assets/images/users/avatar-2.jpg" class="img-fluid rounded-circle" alt=""> </div>
+                            <img src="${pageContext.request.contextPath}/asset/simulor-admin-dashboard/assets/images/users/admin.png" class="img-fluid rounded-circle" alt=""> </div>
                         <p class="notify-details">Manager 11111</p>
                         <p class="text-muted mb-0 user-msg">
                             <small>Room 201 has trouble with window! please check that situation</small>
@@ -42,7 +42,7 @@
 
         <li class="dropdown notification-list">
             <a class="nav-link dropdown-toggle nav-user mr-0 waves-effect waves-light" data-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                <img src="${pageContext.request.contextPath}/asset/simulor-admin-dashboard/assets/images/users/avatar-4.jpg" alt="user-image" class="rounded-circle">
+                <img src="${pageContext.request.contextPath}/asset/simulor-admin-dashboard/assets/images/users/admin.png" alt="user-image" class="rounded-circle">
                 <span class="pro-user-name ml-1">Nguyen Phan Thien Phu</span>
             </a>
             <div class="dropdown-menu dropdown-menu-right profile-dropdown ">

@@ -28,7 +28,7 @@
                     </a>
                     <ul class="nav-second-level" aria-expanded="false">
                         <li>
-                            <a href="${pageContext.request.contextPath}/system?action=checkInWithReservation">Booking Guest</a>
+                            <a href="${pageContext.request.contextPath}/system?action=bookingList">Booking Guest</a>
                         </li>
                         <li>
                             <a href="${pageContext.request.contextPath}/system?action=checkInWithOutReservation">Walk-In Guest</a>

@@ -70,6 +70,7 @@ public class GuestService implements IGuestService{
             Connection connection = GetConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(FIND_GUEST_IN_BOOKING_LIST_BY_ID);
             preparedStatement.setString(1, bookingCode);
+            System.out.println(preparedStatement);
             ResultSet rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 String guestName = rs.getString("guestName");
@@ -84,6 +85,38 @@ public class GuestService implements IGuestService{
             GetConnection.printSQLException(e);
         }
         return guest;
+    }
+
+    @Override
+    public ArrayList<Guest> findBookingCodeByName(String name) {
+        ArrayList<Guest> guestList = new ArrayList<>();
+        String FIND_BOOKING_LIST_BY_NAME = "SELECT * FROM" +
+                " (SELECT bookingCode, guestName, phoneNumber, dayArrival, dayLeave, guaranteeFee, methodPayment FROM Guests" +
+                " WHERE bookingCode NOT IN (SELECT guestId FROM Rooms)) AS BookingList " +
+                "WHERE BookingList.guestName LIKE ?";
+        try {
+            Connection connection = GetConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(FIND_BOOKING_LIST_BY_NAME);
+            String inPutGuestName = "%" + name + "%";
+            System.out.println(inPutGuestName);
+            preparedStatement.setString(1, inPutGuestName);
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                String bookingCode = rs.getString("bookingCode");
+                String guestName = rs.getString("guestName");
+                String phoneNumber = rs.getString("phoneNumber");
+                String dayArrival = rs.getString("dayArrival");
+                String dayLeave = rs.getString("dayLeave");
+                BigDecimal guaranteeFee = rs.getBigDecimal("guaranteeFee");
+                String methodPayment = rs.getString("methodPayment");
+                Guest guest = new Guest(bookingCode,guestName,phoneNumber,dayArrival,dayLeave,guaranteeFee,methodPayment);
+                guestList.add(guest);
+            }
+        } catch (SQLException e) {
+            GetConnection.printSQLException(e);
+        }
+        return guestList;
     }
 
     @Override
@@ -193,13 +226,55 @@ public class GuestService implements IGuestService{
     }
 
     @Override
-    public void checkIn(Guest guest, String roomNumber) {
-
+    public boolean checkIn(String bookingCode, String roomNumber) throws SQLException {
+        boolean isActionSuccess = true;
+        String CHECK_IN_GUEST_TO_ROOM = "UPDATE Rooms SET guestId = ? WHERE roomNumber = ?;";
+        Connection connection = GetConnection.getConnection();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(CHECK_IN_GUEST_TO_ROOM);
+            preparedStatement.setString(1, bookingCode);
+            preparedStatement.setString(2, roomNumber);
+            preparedStatement.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            isActionSuccess = false;
+            GetConnection.printSQLException(e);
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+            connection.close();
+        }
+        return isActionSuccess;
     }
 
     @Override
-    public void checkOut(String roomNumber) {
+    public boolean checkOut(String roomNumber, String bookingCode) throws SQLException {
+        boolean isActionSuccess = true;
+        String CHECK_OUT_GUEST_FROM_ROOM= "UPDATE Rooms SET guestId = ?, roomStatus = ? WHERE roomNumber = ?";
+        String CHECK_OUT_GUEST_FROM_GUESTS = "DELETE FROM Guests WHERE bookingCode = ?;";
 
+        Connection connection = GetConnection.getConnection();
+        try {
+            connection.setAutoCommit(false);
+            PreparedStatement preparedStatement = connection.prepareStatement(CHECK_OUT_GUEST_FROM_ROOM);
+            PreparedStatement preparedStatement2 = connection.prepareStatement(CHECK_OUT_GUEST_FROM_GUESTS);
+            preparedStatement.setString(1, null);
+            preparedStatement.setString(2, "VD");
+            preparedStatement.setString(3, roomNumber);
+            preparedStatement2.setString(1, bookingCode);
+            preparedStatement.executeUpdate();
+            preparedStatement2.executeUpdate();
+            connection.commit();
+        } catch (SQLException e) {
+            isActionSuccess = false;
+            GetConnection.printSQLException(e);
+            connection.rollback();
+        } finally {
+            connection.setAutoCommit(true);
+            connection.close();
+        }
+        return isActionSuccess;
     }
 
 }

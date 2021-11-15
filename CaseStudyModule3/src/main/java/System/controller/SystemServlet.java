@@ -3,6 +3,7 @@ package System.controller;
 import System.Tools.CompareDate;
 import System.Tools.DateValidatorUsingDateFormat;
 import System.model.Guest;
+import System.model.Room;
 import System.model.Staff;
 import System.service.*;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,12 +43,25 @@ public class SystemServlet extends HttpServlet {
                     e.printStackTrace();
                 }
                 break;
-            case "update":
+            case "bookingList":
+                showBookingList(request, response);
+                break;
+            case "updateReservation":
                 try {
                     doUpdateReservation(request, response);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
+                break;
+            case "removeReservation":
+                try {
+                    doRemove(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case "checkInWithReservation":
+                doCheckInByReservation(request, response);
                 break;
             case "checkInWithOutReservation":
                 break;
@@ -74,22 +89,22 @@ public class SystemServlet extends HttpServlet {
             case "bookingList":
                 showBookingList(request, response);
                 break;
-            case "update":
-                showUpdateForm(request, response);
-                break;
-            case "remove":
+            case "updateReservation":
                 showUpdateForm(request, response);
                 break;
             case "removeReservation":
-//                showRemoveForm(request, response);
+                showRemoveConfirm(request, response);
                 break;
             case "checkInWithReservation":
-//                showConfirmCheckIn(request, response);
+                showCheckInConfirm(request, response);
                 break;
             case "checkInWithOutReservation":
 //                showRegistrationForm(request, response);
                 break;
             case "checkOut":
+                break;
+            case "showRoomList":
+                showRoomList(request, response);
                 break;
             default:
                 showSignIn(request, response, null);
@@ -283,8 +298,21 @@ public class SystemServlet extends HttpServlet {
     }
 
     private void showBookingList(HttpServletRequest request, HttpServletResponse response) {
-        ArrayList<Guest> bookingList = guestService.findBookingList();
+        String bookingCode = request.getParameter("bookingCode");
+        String guestName = request.getParameter("guestName");
         RequestDispatcher dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
+        ArrayList<Guest> bookingList = new ArrayList<>();
+
+        if (bookingCode == null || bookingCode.equals("")) {
+            if (guestName == null || guestName.equals("")) {
+                bookingList = guestService.findBookingList();
+            } else {
+                bookingList = guestService.findBookingCodeByName(guestName);
+            }
+        } else {
+            Guest guest = guestService.findGuestByBookingCode(bookingCode);
+            bookingList.add(guest);
+        }
         request.setAttribute("bookingList", bookingList);
         try {
             dispatcher.forward(request, response);
@@ -308,10 +336,9 @@ public class SystemServlet extends HttpServlet {
         } catch (ServletException | IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    private void doUpdateReservation (HttpServletRequest request, HttpServletResponse response) throws SQLException {
+    private void doUpdateReservation(HttpServletRequest request, HttpServletResponse response) throws SQLException {
         String checkName;
         String fullName = "";
         String OutPutFullName = request.getParameter("guestName");
@@ -391,9 +418,10 @@ public class SystemServlet extends HttpServlet {
                 && checkDepartureDate.equals("success") && checkGuaranteeFee.equals("success")) {
             Guest guest = new Guest(bookingCode, fullName, phoneNumber, arrivalDate, departureDate, guaranteeFee, methodPayment);
             if (guestService.updateReservation(bookingCode,guest)) {
-                dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
                 ArrayList<Guest> bookingList = guestService.findBookingList();
                 request.setAttribute("bookingList", bookingList);
+                request.setAttribute("message", "update");
+                dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
             } else {
                 dispatcher = request.getRequestDispatcher("guest/update.jsp");
                 request.setAttribute("message", "false");
@@ -422,8 +450,94 @@ public class SystemServlet extends HttpServlet {
         }
     }
 
+    private void showRemoveConfirm(HttpServletRequest request, HttpServletResponse response){
+        String bookingCode = request.getParameter("id");
+        Guest guest = guestService.findGuestByBookingCode(bookingCode);
+        RequestDispatcher dispatcher;
+        if(guest == null){
+            dispatcher = request.getRequestDispatcher("error-404.jsp");
+        } else {
+            request.setAttribute("guest", guest);
+            dispatcher = request.getRequestDispatcher("guest/remove.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void doRemove(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+        String bookingCode = request.getParameter("bookingCode");
+        RequestDispatcher dispatcher;
+        if (guestService.removeReservation(bookingCode)) {
+            ArrayList<Guest> bookingList = guestService.findBookingList();
+            request.setAttribute("bookingList", bookingList);
+            request.setAttribute("message", "remove");
+            dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
+        } else {
+            Guest guest = guestService.findGuestByBookingCode(bookingCode);
+            request.setAttribute("guest", guest);
+            dispatcher = request.getRequestDispatcher("guest/remove.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void showCheckInConfirm(HttpServletRequest request, HttpServletResponse response) {
+        String bookingCode = request.getParameter("bookingCode");
+        Guest guest = guestService.findGuestByBookingCode(bookingCode);
+        ArrayList<Room> roomList = roomService.findRoomList();
+        RequestDispatcher dispatcher;
+        if(guest == null){
+            dispatcher = request.getRequestDispatcher("error-404.jsp");
+        } else {
+            request.setAttribute("guest", guest);
+            request.setAttribute("roomList", roomList);
+            dispatcher = request.getRequestDispatcher("guest/checkIn.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void doCheckInByReservation(HttpServletRequest request, HttpServletResponse response) {
+        String bookingCode = request.getParameter("bookingCode");
+        String roomNumber = request.getParameter("roomNumber");
+
+    }
+
+    private void showRegistrationForm(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    private void doCheckInByRegistration(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    private void showCheckOutConfirm(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    private void doCheckOut(HttpServletRequest request, HttpServletResponse response) {
+
+    }
+
+    private void showRoomList(HttpServletRequest request, HttpServletResponse response) {
+        RequestDispatcher dispatcher = request.getRequestDispatcher("room/roomList.jsp");
+        ArrayList<Room> roomList = roomService.findRoomList();
+        request.setAttribute("roomList", roomList);
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     public boolean isBookingCodeValid(String bookingCode) {

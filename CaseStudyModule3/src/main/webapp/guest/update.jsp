@@ -30,7 +30,7 @@
                                     <i class="fas fa-user-alt"></i>
                                     <span class= "active_point">MainMenu</span>
                                 </li>
-                                <li class="breadcrumb-item" onclick='window.location.href="/system?action=mainMenu"'>
+                                <li class="breadcrumb-item" onclick='window.location.href="/system?action=bookingList"'>
                                     <i class="fas fa-list-alt"></i>
                                     <span class= "active_point">BookingList</span>
                                 </li>
@@ -174,7 +174,7 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="validationDefault04" class="form-label">State</label>
+                                    <label for="validationDefault04" class="form-label">Method Payment</label>
                                     <select class="form-select" id="validationDefault06" name="methodPayment" required>
                                         <c:if test='${requestScope["checkGuaranteeFee"] != null}'>
                                             <option selected disabled value="${requestScope["methodPayment"]}">${requestScope["methodPayment"]}</option>

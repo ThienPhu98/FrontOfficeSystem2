@@ -16,6 +16,8 @@ public interface IGuestService {
 
     Guest findGuestInHouseById(String guestId);
 
+    ArrayList<Guest> findBookingCodeByName(String name);
+
 //do booking
     boolean booking(Guest guest) throws SQLException;
 
@@ -25,11 +27,11 @@ public interface IGuestService {
 
 
 //do check-in
-    void checkIn(Guest guest, String roomNumber);
+    boolean checkIn(String bookingCode, String roomNumber) throws SQLException;
 
 
 //do check-out
-    void checkOut(String roomNumber);
+    boolean checkOut(String roomNumber, String bookingCode) throws SQLException;
 
 
 }

@@ -45,6 +45,26 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
+                            <form class="row g-3" method="post">
+                                <div class="col-md-5">
+                                    <div class="input-group flex-nowrap">
+                                        <span class="input-group-text">Booking Code</span>
+                                        <input type="text" class="form-control" placeholder="Guest's Booking Code" aria-label="Username" aria-describedby="addon-wrapping" name="bookingCode">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="input-group flex-nowrap">
+                                        <span class="input-group-text">Guest Name</span>
+                                        <input type="text" class="form-control" placeholder="Guest's Name" aria-label="Username" aria-describedby="addon-wrapping" name="guestName">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary" type="submit">Find Reservation</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="card-body">
                             <table class="table table-hover table-centered mb-0">
                                 <thead>
                                 <tr class="table-primary">
@@ -69,17 +89,17 @@
                                         <td>${guest.getGuaranteeFee()}</td>
                                         <td>${guest.getMethodPayment()}</td>
                                         <td>
-                                            <button type="button" class="btn btn-success" onclick='window.location.href="/system?action=checkIn&bookingCode=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-success" onclick='window.location.href="/system?action=checkInWithReservation&bookingCode=${guest.getBookingCode()}"'>
                                                 <i class="fas fa-user-check"></i>
                                             </button>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-warning" onclick='window.location.href="/system?action=update&id=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-warning" onclick='window.location.href="/system?action=updateReservation&id=${guest.getBookingCode()}"'>
                                                 <i class="fas fa-user-edit"></i>
                                             </button>
                                         </td>
                                         <td>
-                                            <button type="button" class="btn btn-danger" onclick='window.location.href="/system?action=remove&bookingCode=${guest.getBookingCode()}"'>
+                                            <button type="button" class="btn btn-danger" onclick='window.location.href="/system?action=removeReservation&id=${guest.getBookingCode()}"'>
                                                 <i class="fas fa-user-times"></i>
                                             </button>
                                         </td>
@@ -88,6 +108,16 @@
                                 </tbody>
                             </table>
                         </div>
+                        <c:if test='${requestScope["message"] == "update"}'>
+                            <div class="alert alert-success" role="alert" style="margin-left: 20px">
+                                <span>Update Success!!!</span>
+                            </div>
+                        </c:if>
+                        <c:if test='${requestScope["message"] == "remove"}'>
+                            <div class="alert alert-success" role="alert" style="margin-left: 20px">
+                                <span>Remove Success!!!</span>
+                            </div>
+                        </c:if>
                     </div>
                 </div>
             </div>

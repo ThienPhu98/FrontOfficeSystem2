@@ -29,6 +29,9 @@ public class RoomService implements IRoomService{
                     isAvailable = true;
                 }
                 String guestId = rs.getString("guestId");
+                if (guestId == null) {
+                    guestId = "";
+                }
                 roomList.add(new Room(roomNumber, roomType, roomStatus, roomPrice, isAvailable, guestId));
             }
         } catch (SQLException e) {

@@ -160,7 +160,7 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label for="validationDefault04" class="form-label">State</label>
+                                    <label for="validationDefault04" class="form-label">Method Payment</label>
                                     <select class="form-select" id="validationDefault06" name="methodPayment" required>
                                         <option value="Cash">Cash</option>
                                         <option value="Credit Card">Credit Card</option>
