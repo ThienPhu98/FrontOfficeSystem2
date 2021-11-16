@@ -61,11 +61,20 @@ public class SystemServlet extends HttpServlet {
                 }
                 break;
             case "checkInWithReservation":
-                doCheckInByReservation(request, response);
+                try {
+                    doCheckInByReservation(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 break;
             case "checkInWithOutReservation":
                 break;
             case "checkOut":
+                try {
+                    doCheckOut(request, response);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
                 doSignIn(request, response);
@@ -102,6 +111,7 @@ public class SystemServlet extends HttpServlet {
 //                showRegistrationForm(request, response);
                 break;
             case "checkOut":
+                showCheckOutConfirm(request, response);
                 break;
             case "showRoomList":
                 showRoomList(request, response);
@@ -506,10 +516,47 @@ public class SystemServlet extends HttpServlet {
         }
     }
 
-    private void doCheckInByReservation(HttpServletRequest request, HttpServletResponse response) {
+    private void doCheckInByReservation(HttpServletRequest request, HttpServletResponse response) throws SQLException {
         String bookingCode = request.getParameter("bookingCode");
+        Guest guest = guestService.findGuestByBookingCode(bookingCode);
         String roomNumber = request.getParameter("roomNumber");
+        ArrayList<Room> roomList = roomService.findRoomList();
 
+        boolean isRoomValid = true;
+        for (Room room: roomList) {
+            if (room.getRoomNumber().equals(roomNumber)) {
+                if (!room.getAvailable()) {
+                    isRoomValid = false;
+                    break;
+                }
+            }
+        }
+        RequestDispatcher dispatcher;
+
+        if (isRoomValid) {
+            if (guestService.checkIn(bookingCode, roomNumber)) {
+                ArrayList<Guest> bookingList = guestService.findBookingList();
+                request.setAttribute("bookingList", bookingList);
+                request.setAttribute("message", "checkIn");
+                dispatcher = request.getRequestDispatcher("guest/bookingList.jsp");
+            } else {
+                request.setAttribute("guest", guest);
+                request.setAttribute("roomList", roomList);
+                request.setAttribute("message", "false");
+                dispatcher = request.getRequestDispatcher("guest/checkIn.jsp");
+            }
+        } else {
+            request.setAttribute("guest", guest);
+            request.setAttribute("roomList", roomList);
+            request.setAttribute("message", "false");
+            dispatcher = request.getRequestDispatcher("guest/checkIn.jsp");
+        }
+
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showRegistrationForm(HttpServletRequest request, HttpServletResponse response) {
@@ -521,17 +568,66 @@ public class SystemServlet extends HttpServlet {
     }
 
     private void showCheckOutConfirm(HttpServletRequest request, HttpServletResponse response) {
+        String roomNumber = request.getParameter("id");
+        Room room = roomService.findRoomByRoomNumber(roomNumber);
+        Guest guest = guestService.findGuestInHouseById(room.getGuestId());
+        RequestDispatcher dispatcher;
+        if(room == null || guest == null){
+            dispatcher = request.getRequestDispatcher("error-404.jsp");
+        } else {
+            request.setAttribute("guest", guest);
+            request.setAttribute("room", room);
+            dispatcher = request.getRequestDispatcher("guest/checkOut.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private void doCheckOut(HttpServletRequest request, HttpServletResponse response) {
-
+    private void doCheckOut(HttpServletRequest request, HttpServletResponse response) throws SQLException {
+        String roomNumber = request.getParameter("roomNumber");
+        String guestId = request.getParameter("bookingCode");
+        RequestDispatcher dispatcher;
+        if (guestService.checkOut(roomNumber, guestId)) {
+            ArrayList<Room> roomList = roomService.findRoomList();
+            request.setAttribute("roomList", roomList);
+            request.setAttribute("message", "check-Out");
+            dispatcher = request.getRequestDispatcher("room/roomList.jsp");
+        } else {
+            Guest guest = guestService.findGuestInHouseById(guestId);
+            Room room = roomService.findRoomByRoomNumber(roomNumber);
+            request.setAttribute("guest", guest);
+            request.setAttribute("room", room);
+            request.setAttribute("message", "false");
+            dispatcher = request.getRequestDispatcher("guest/checkOut.jsp");
+        }
+        try {
+            dispatcher.forward(request, response);
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showRoomList(HttpServletRequest request, HttpServletResponse response) {
+        String message = request.getParameter("id");
+        ArrayList<Room> outPutRoomList = roomService.findRoomList();
         RequestDispatcher dispatcher = request.getRequestDispatcher("room/roomList.jsp");
-        ArrayList<Room> roomList = roomService.findRoomList();
-        request.setAttribute("roomList", roomList);
+
+        if (message == null) {
+            request.setAttribute("roomList", outPutRoomList);
+        } else {
+            ArrayList<Room> roomList = new ArrayList<>();
+            for (Room room : outPutRoomList) {
+                if (!room.getAvailable()) {
+                    roomList.add(room);
+                }
+            }
+            request.setAttribute("roomList", roomList);
+        }
+
         try {
             dispatcher.forward(request, response);
         } catch (ServletException | IOException e) {

@@ -81,7 +81,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label for="validationDefault05" class="form-label">Method Payment</label>
-                                    <input type="date" class="form-control" id="validationDefault05" value=${guest.getMethodPayment()} name="methodPayment" readonly>
+                                    <input type="text" class="form-control" id="validationDefault05" value=${guest.getMethodPayment()} name="methodPayment" readonly>
                                 </div>
 
                                 <div class="col-12">

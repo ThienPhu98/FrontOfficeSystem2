@@ -9,6 +9,8 @@ public interface IRoomService {
 
     ArrayList<Room> findRoomList();
 
+    Room findRoomByRoomNumber(String roomNumber);
+
     void changeRoomStatus(String roomNumber, String status);
 
     void changeRoomAvailability(String roomNumber, boolean isAvailable);

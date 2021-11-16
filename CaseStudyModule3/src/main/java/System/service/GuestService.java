@@ -228,13 +228,15 @@ public class GuestService implements IGuestService{
     @Override
     public boolean checkIn(String bookingCode, String roomNumber) throws SQLException {
         boolean isActionSuccess = true;
-        String CHECK_IN_GUEST_TO_ROOM = "UPDATE Rooms SET guestId = ? WHERE roomNumber = ?;";
+        String CHECK_IN_GUEST_TO_ROOM = "UPDATE Rooms SET guestId = ?, roomStatus = ?, isAvailable = ?  WHERE roomNumber = ?;";
         Connection connection = GetConnection.getConnection();
         try {
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(CHECK_IN_GUEST_TO_ROOM);
             preparedStatement.setString(1, bookingCode);
-            preparedStatement.setString(2, roomNumber);
+            preparedStatement.setString(2, "OD");
+            preparedStatement.setString(3, "false");
+            preparedStatement.setString(4, roomNumber);
             preparedStatement.executeUpdate();
             connection.commit();
         } catch (SQLException e) {
@@ -251,7 +253,7 @@ public class GuestService implements IGuestService{
     @Override
     public boolean checkOut(String roomNumber, String bookingCode) throws SQLException {
         boolean isActionSuccess = true;
-        String CHECK_OUT_GUEST_FROM_ROOM= "UPDATE Rooms SET guestId = ?, roomStatus = ? WHERE roomNumber = ?";
+        String CHECK_OUT_GUEST_FROM_ROOM= "UPDATE Rooms SET guestId = ?, roomStatus = ?, isAvailable = ? WHERE roomNumber = ?";
         String CHECK_OUT_GUEST_FROM_GUESTS = "DELETE FROM Guests WHERE bookingCode = ?;";
 
         Connection connection = GetConnection.getConnection();
@@ -259,9 +261,10 @@ public class GuestService implements IGuestService{
             connection.setAutoCommit(false);
             PreparedStatement preparedStatement = connection.prepareStatement(CHECK_OUT_GUEST_FROM_ROOM);
             PreparedStatement preparedStatement2 = connection.prepareStatement(CHECK_OUT_GUEST_FROM_GUESTS);
-            preparedStatement.setString(1, null);
+            preparedStatement.setString(1, "empty");
             preparedStatement.setString(2, "VD");
-            preparedStatement.setString(3, roomNumber);
+            preparedStatement.setString(3, "true");
+            preparedStatement.setString(4, roomNumber);
             preparedStatement2.setString(1, bookingCode);
             preparedStatement.executeUpdate();
             preparedStatement2.executeUpdate();

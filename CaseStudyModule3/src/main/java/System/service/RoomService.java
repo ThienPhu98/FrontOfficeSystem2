@@ -41,6 +41,35 @@ public class RoomService implements IRoomService{
     }
 
     @Override
+    public Room findRoomByRoomNumber(String roomNumber) {
+        Room room = null;
+        String SELECT_ROOM_BY_NUMBER = "SELECT roomNumber, roomType, roomStatus, roomPrice, isAvailable, guestId FROM Rooms WHERE roomNumber = ?;";
+        try {
+            Connection connection = GetConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ROOM_BY_NUMBER);
+            preparedStatement.setString(1, roomNumber);
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                String outPutRoomNumber = rs.getString("roomNumber");
+                String roomType = rs.getString("roomType");
+                String roomStatus = rs.getString("roomStatus");
+                BigDecimal roomPrice = rs.getBigDecimal("roomPrice");
+                String outPutIsAvailable = rs.getString("isAvailable");
+                boolean isAvailable = false;
+                if(outPutIsAvailable.equals("true")) {
+                    isAvailable = true;
+                }
+                String guestId = rs.getString("guestId");
+                room = new Room(outPutRoomNumber, roomType, roomStatus, roomPrice, isAvailable, guestId);
+            }
+        } catch (SQLException e) {
+            GetConnection.printSQLException(e);
+        }
+        return room;
+    }
+
+    @Override
     public void changeRoomStatus(String roomNumber, String status) {
         String CHANGE_ROOM_STATUS = "UPDATE Rooms SET roomStatus = ? WHERE roomNumber = ?;";
         try {

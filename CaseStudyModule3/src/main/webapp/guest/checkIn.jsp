@@ -35,7 +35,7 @@
                                     <span class= "active_point">BookingList</span>
                                 </li>
                                 <li class="breadcrumb-item active">
-                                    <i class="fas fa-user-check"></i>
+                                    <i class="fas fa-user-times"></i>
                                     <span>Check In</span>
                                 </li>
                             </ol>
@@ -72,7 +72,7 @@
                                     <input type="date" class="form-control" id="validationDefault04" value=${guest.getDayLeave()} name="departureDate" readonly>
                                 </div>
 
-                                <div class="col-md-9">
+                                <div class="col-md-6">
                                     <label for="validationDefaultUsername" class="form-label">Guarantee Fee</label>
                                     <div class="input-group">
                                         <input type="number" class="form-control" id="validationDefaultUsername" value=${guest.getGuaranteeFee()} name="guaranteeFee" style="text-align: right" readonly>
@@ -81,21 +81,39 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label for="validationDefault05" class="form-label">Method Payment</label>
-                                    <input type="date" class="form-control" id="validationDefault05" value=${guest.getMethodPayment()} name="methodPayment" readonly>
+                                    <input type="text" class="form-control" id="validationDefault05" value=${guest.getMethodPayment()} name="methodPayment" readonly>
+                                </div>
+                                <div class="col-3">
+                                    <c:if test='${requestScope["checkRoom"] == "false"}'>
+                                        <label for="validationDefault06" class="form-label">Room Number</label>
+                                        <input type="text" class="form-control is-invalid" id="validationServer06" value=${requestScope["roomNumber"]} name="roomNumber" required>
+                                        <div id="validationServer06Feedback" class="invalid-feedback">
+                                            Room Number Invalid! Room must be empty to check-In!
+                                        </div>
+                                    </c:if>
+                                    <c:if test='${requestScope["checkRoom"] == null}'  >
+                                        <label for="validationDefault06" class="form-label">Room Number</label>
+                                        <input type="text" class="form-control" id="validationDefault06" placeholder="Enter Room Number" name="roomNumber" required>
+                                    </c:if>
                                 </div>
 
-                                <div class="col-6">
-                                    <button class="btn btn-primary" type="submit">Confirm Check-In</button>
+                                <div class="col-2">
+                                    <button class="btn btn-primary" type="submit">Confirm Check In</button>
                                 </div>
-
-                                <div class="col-6">
-                                    <span class="input-group-text">Room Number</span>
-                                    <input type="text" class="form-control" placeholder="Enter Room Number" aria-label="Username" aria-describedby="addon-wrapping" name="roomNumber" required>
+                                <div class="col-10">
+                                    <c:if test='${requestScope["message"] == "false"}'>
+                                        <div class="alert alert-danger" role="alert" style="margin-left: 20px">
+                                            <span>Check-In Fail! please follow Instructor!</span>
+                                        </div>
+                                    </c:if>
                                 </div>
                             </form>
                         </div>
 
                         <div class="card-body">
+                            <div class="card-header">
+                                Room Status List
+                            </div>
                             <table class="table table-hover table-centered mb-0">
                                 <thead>
                                 <tr class="table-primary">
@@ -110,10 +128,10 @@
                                 <c:forEach items='${requestScope["roomList"]}' var="room">
                                     <tr>
                                         <td>${room.getRoomNumber()}</td>
-                                        <td>${room.roomType()}</td>
-                                        <td>${room.roomStatus()}</td>
-                                        <td>${room.roomPrice()}</td>
-                                        <td>${room.guestId()}</td>
+                                        <td>${room.getRoomType()}</td>
+                                        <td>${room.getRoomStatus()}</td>
+                                        <td>${room.getRoomPrice()}</td>
+                                        <td>${room.getGuestId()}</td>
                                     </tr>
                                 </c:forEach>
                                 </tbody>
@@ -131,4 +149,3 @@
 <%@include file ="/layout/script.jsp" %>
 </body>
 </html>
-

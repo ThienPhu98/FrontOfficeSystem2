@@ -36,7 +36,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="${pageContext.request.contextPath}/system?action=checkOut">
+                    <a href="${pageContext.request.contextPath}/system?action=showRoomList&id=checkOut">
                         <i class="bi bi-person-x-fill"></i>
                         <span> Check-Out </span>
                     </a>

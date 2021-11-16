@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Booking List</title>
+    <title>Room List</title>
     <%@include file ="/layout/headAndLink.jsp" %>
     <style>
         .active_point:hover {
@@ -31,12 +31,12 @@
                                     <span class= "active_point">MainMenu</span>
                                 </li>
                                 <li class="breadcrumb-item active">
-                                    <i class="fas fa-list-alt"></i>
-                                    <span>Booking List</span>
+                                    <i class="fas fa-bed"></i>
+                                    <span>Room List</span>
                                 </li>
                             </ol>
                         </div>
-                        <h4 class="page-title">Booking List</h4>
+                        <h4 class="page-title">Room List</h4>
                     </div>
                 </div>
             </div>
@@ -49,37 +49,28 @@
                                 <thead>
                                 <tr class="table-primary">
                                     <th scope="col">#</th>
-                                    <th scope="col">guestName</th>
-                                    <th scope="col">phoneNumber</th>
-                                    <th scope="col">dayArrival</th>
-                                    <th scope="col">dayLeave</th>
-                                    <th scope="col">guaranteeFee</th>
-                                    <th scope="col">methodPayment</th>
-                                    <th colspan="3" style="text-align: center">Action</th>
+                                    <th scope="col">roomType</th>
+                                    <th scope="col">roomStatus</th>
+                                    <th scope="col">roomPrice</th>
+                                    <th scope="col">guestId</th>
+                                    <th colspan="2" style="text-align: center">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <c:forEach items='${requestScope["bookingList"]}' var="guest">
+                                <c:forEach items='${requestScope["roomList"]}' var="room">
                                     <tr>
-                                        <td>${guest.getBookingCode()}</td>
-                                        <td>${guest.getGuestName()}</td>
-                                        <td>${guest.getPhoneNumber()}</td>
-                                        <td>${guest.getDayArrival()}</td>
-                                        <td>${guest.getDayLeave()}</td>
-                                        <td>${guest.getGuaranteeFee()}</td>
-                                        <td>${guest.getMethodPayment()}</td>
-                                        <td>
-                                            <button type="button" class="btn btn-success" onclick='window.location.href="/system?action=checkInWithReservation&bookingCode=${guest.getBookingCode()}"'>
-                                                <i class="fas fa-user-check"></i>
+                                        <td>${room.getRoomNumber()}</td>
+                                        <td>${room.getRoomType()}</td>
+                                        <td>${room.getRoomStatus()}</td>
+                                        <td>${room.getRoomPrice()}</td>
+                                        <td>${room.getGuestId()}</td>
+                                        <td style="text-align: center">
+                                            <button type="button" class="btn btn-warning" onclick='window.location.href="/system?action=roomUpdate&id=${room.getRoomNumber()}"'>
+                                                <i class="fas fa-pen-square"></i>
                                             </button>
                                         </td>
-                                        <td>
-                                            <button type="button" class="btn btn-warning" onclick='window.location.href="/system?action=updateReservation&id=${guest.getBookingCode()}"'>
-                                                <i class="fas fa-user-edit"></i>
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-danger" onclick='window.location.href="/system?action=removeReservation&id=${guest.getBookingCode()}"'>
+                                        <td style="text-align: center">
+                                            <button type="button" class="btn btn-danger" onclick='window.location.href="/system?action=checkOut&id=${room.getRoomNumber()}"'>
                                                 <i class="fas fa-user-times"></i>
                                             </button>
                                         </td>
@@ -93,9 +84,9 @@
                                 <span>Update Success!!!</span>
                             </div>
                         </c:if>
-                        <c:if test='${requestScope["message"] == "remove"}'>
+                        <c:if test='${requestScope["message"] == "check-Out"}'>
                             <div class="alert alert-success" role="alert" style="margin-left: 20px">
-                                <span>Remove Success!!!</span>
+                                <span>Check-Out Success!!!</span>
                             </div>
                         </c:if>
                     </div>

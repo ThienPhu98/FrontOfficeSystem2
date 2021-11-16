@@ -118,6 +118,11 @@
                                 <span>Remove Success!!!</span>
                             </div>
                         </c:if>
+                        <c:if test='${requestScope["message"] == "checkIn"}'>
+                            <div class="alert alert-success" role="alert" style="margin-left: 20px">
+                                <span>Check In Success!!!</span>
+                            </div>
+                        </c:if>
                     </div>
                 </div>
             </div>
